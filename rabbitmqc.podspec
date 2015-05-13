@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "rabbitmqc"
-  s.version      = "0.6.5"
+  s.version      = "0.6.6"
   s.summary      = "rabbitmqc for iOS"
   s.description  = "rabbitmqc for iOS (armv7,arm64,i386,x86_64)."
   s.homepage     = "http://github.com/"
