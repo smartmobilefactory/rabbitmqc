@@ -229,6 +229,24 @@ AMQP_BEGIN_DECLS
 
 
 /**
+ * \def AMQP_VERSION_CODE
+ *
+ * Helper macro to geneate a packed version code suitable for
+ * comparison with AMQP_VERSION.
+ *
+ * \sa amqp_version_number() AMQP_VERSION_MAJOR, AMQP_VERSION_MINOR,
+ *     AMQP_VERSION_PATCH, AMQP_VERSION_IS_RELEASE, AMQP_VERSION
+ *
+ * \since v0.6.1
+ */
+#define AMQP_VERSION_CODE(major, minor, patch, release) \
+    ((major << 24) | \
+     (minor << 16) | \
+     (patch << 8)  | \
+     (release))
+
+
+/**
  * \def AMQP_VERSION
  *
  * Packed version number
@@ -242,14 +260,14 @@ AMQP_BEGIN_DECLS
  * 0x02030401
  *
  * \sa amqp_version_number() AMQP_VERSION_MAJOR, AMQP_VERSION_MINOR,
- *     AMQP_VERSION_PATCH, AMQP_VERSION_IS_RELEASE
+ *     AMQP_VERSION_PATCH, AMQP_VERSION_IS_RELEASE, AMQP_VERSION_CODE
  *
  * \since v0.4.0
  */
-#define AMQP_VERSION ((AMQP_VERSION_MAJOR << 24) | \
-                      (AMQP_VERSION_MINOR << 16) | \
-                      (AMQP_VERSION_PATCH << 8)  | \
-                      (AMQP_VERSION_IS_RELEASE))
+#define AMQP_VERSION AMQP_VERSION_CODE(AMQP_VERSION_MAJOR, \
+                                       AMQP_VERSION_MINOR, \
+                                       AMQP_VERSION_PATCH, \
+                                       AMQP_VERSION_IS_RELEASE)
 
 /** \cond HIDE_FROM_DOXYGEN */
 #define AMQ_STRINGIFY(s) AMQ_STRINGIFY_HELPER(s)
@@ -634,7 +652,9 @@ typedef struct amqp_rpc_reply_t_ {
  * \since v0.1
  */
 typedef enum amqp_sasl_method_enum_ {
-  AMQP_SASL_METHOD_PLAIN = 0      /**< the PLAIN SASL method for authentication to the broker */
+  AMQP_SASL_METHOD_UNDEFINED = -1, /**< Invalid SASL method */
+  AMQP_SASL_METHOD_PLAIN = 0,      /**< the PLAIN SASL method for authentication to the broker */
+  AMQP_SASL_METHOD_EXTERNAL = 1    /**< the EXTERNAL SASL method for authentication to the broker */
 } amqp_sasl_method_enum;
 
 /**
@@ -703,7 +723,10 @@ typedef enum amqp_status_enum_
                                                         closed */
   AMQP_STATUS_SOCKET_INUSE =              -0x0012, /**< Underlying socket is
                                                         already open */
-  _AMQP_STATUS_NEXT_VALUE =               -0x0013, /**< Internal value */
+  AMQP_STATUS_BROKER_UNSUPPORTED_SASL_METHOD = -0x0013, /**< Broker does not
+                                                          support the requested
+                                                          SASL mechanism */
+  _AMQP_STATUS_NEXT_VALUE =               -0x0014, /**< Internal value */
 
   AMQP_STATUS_TCP_ERROR =                 -0x0100, /**< A generic TCP error
                                                         occurred */
@@ -737,7 +760,7 @@ typedef enum {
 
 AMQP_END_DECLS
 
-#include "amqp_framing.h"
+#include <amqp_framing.h>
 
 AMQP_BEGIN_DECLS
 
@@ -2123,7 +2146,7 @@ AMQP_CALL amqp_encode_table(amqp_bytes_t encoded, amqp_table_t *input, size_t *o
  */
 AMQP_PUBLIC_FUNCTION
 int
-AMQP_CALL amqp_table_clone(amqp_table_t *original, amqp_table_t *clone, amqp_pool_t *pool);
+AMQP_CALL amqp_table_clone(const amqp_table_t *original, amqp_table_t *clone, amqp_pool_t *pool);
 
 /**
  * A message object
@@ -2382,6 +2405,22 @@ amqp_get_socket(amqp_connection_state_t state);
 AMQP_PUBLIC_FUNCTION
 amqp_table_t *
 amqp_get_server_properties(amqp_connection_state_t state);
+
+/**
+ * Get the client properties table
+ *
+ * Get the properties that were passed to the broker on connection.
+ *
+ * \param [in] state the connection object
+ * \return a pointer to an amqp_table_t containing the properties advertised
+ *  by the client on connection. The connection object owns the table, it
+ *  should not be modified.
+ *
+ * \since v0.7.0
+ */
+AMQP_PUBLIC_FUNCTION
+amqp_table_t *
+amqp_get_client_properties(amqp_connection_state_t state);
 
 AMQP_END_DECLS
 
