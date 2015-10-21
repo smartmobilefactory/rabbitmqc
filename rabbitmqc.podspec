@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
   s.description  = "rabbitmqc for iOS (armv7,arm64,i386,x86_64)."
   s.homepage     = "http://github.com/"
   s.license	     = { :type => 'LICENSE-MIT', :file => 'LICENSE.txt' }
-  s.source       = { :git => "https://github.com/7tomek/rabbitmqc.git", :tag => "#{s.version}" }
+  s.source       = { :git => "https://github.com/smartmobilefactory/rabbitmqc.git", :tag => s.version }
 
   s.authors       =  {'Alan Antonuk' => '',
                       'VMware' => '',
